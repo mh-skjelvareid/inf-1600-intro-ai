@@ -6,17 +6,22 @@ app = marimo.App(width="medium")
 
 @app.cell
 def _():
-    import marimo as mo
     import numpy as np
     import plotly.graph_objects as go
     import polars as pl
+
+    import marimo as mo
+
     return go, mo, np, pl
 
 
 @app.cell
 def _(pl):
     # Read noisy heart rate data
-    df = pl.read_csv("data/noisy_heart_rate_time_series.csv")
+    df = pl.read_csv(
+        "https://raw.githubusercontent.com/mh-skjelvareid/inf-1600-intro-ai/main/data/noisy_heart_rate_time_series.csv"
+    )
+
     time = df["t"].to_numpy()
     hr_accurate_orig = df["heart_rate_accurate"].to_numpy()
     hr_noisy_orig = df["heart_rate_noisy"].to_numpy()
@@ -36,8 +41,12 @@ def _(hr_accurate_orig, hr_noisy_orig, np):
 @app.cell
 def _(mo):
     # Define input sliders
-    w1 = mo.ui.slider(start=0, stop=1.1, step=0.05, value=0.2, label="w1", show_value=True)
-    w2 = mo.ui.slider(start=0, stop=1.1, step=0.05, value=0.2, label="w2", show_value=True)
+    w1 = mo.ui.slider(
+        start=0, stop=1.1, step=0.05, value=0.2, label="w1", show_value=True
+    )
+    w2 = mo.ui.slider(
+        start=0, stop=1.1, step=0.05, value=0.2, label="w2", show_value=True
+    )
     b = mo.ui.slider(start=-1, stop=1, step=0.05, value=0, label="b", show_value=True)
     return b, w1, w2
 
@@ -61,7 +70,10 @@ def _(b, mo, w1, w2):
     mo.vstack(
         [
             mo.md("# 'Manual' recurrent neural network"),
-            mo.image("figures/simple_rnn.svg", width=400),
+            mo.image(
+                "https://raw.githubusercontent.com/mh-skjelvareid/inf-1600-intro-ai/main/figures/simple_rnn.svg",
+                width=400,
+            ),
             w1,
             w2,
             b,

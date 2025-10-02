@@ -11,7 +11,8 @@ def _():
     import plotly.graph_objects as go
     import polars as pl
     import marimo as mo
-    return go, mo, np, pl
+    import plotly.express as px
+    return go, mo, np, pl, px
 
 
 @app.cell
@@ -37,20 +38,66 @@ def _(mo):
 @app.cell
 def _(pl):
     # Read data from CSV file
-    df = pl.read_csv("data/simple_acc_hr_dataset_v2.csv")
+    # df = pl.read_csv("data/simple_acc_hr_dataset_v2.csv")
+    df = pl.read_csv(
+        "https://raw.githubusercontent.com/mh-skjelvareid/inf-1600-intro-ai/main/data/simple_acc_hr_dataset_v2.csv"
+    )
 
-    X_orig = df.select(pl.col(["acceleration (m/s2)", "heart_rate (bpm)"])).to_numpy()
-    y = df.select(pl.col("state_int")).to_numpy().flatten()
-    return X_orig, y
+    # df # Show dataframe
+    return (df,)
 
 
 @app.cell
-def _(X_orig, np):
+def _(df, np, pl):
     # Normalize data
+    X_orig = df.select(pl.col(["acceleration (m/s2)", "heart_rate (bpm)"])).to_numpy()
+    y = df.select(pl.col("state_int")).to_numpy().flatten()
+
     X_mean = np.mean(X_orig, axis=0)
     X_std = np.std(X_orig, axis=0)
     X = (X_orig - X_mean) / X_std
-    return (X,)
+
+    # Create a dataframe with normalized data - easier visualization
+    df_norm = pl.DataFrame(
+        {
+            "acceleration_norm": X[:, 0],
+            "heart_rate_norm": X[:, 1],
+            "state": df["state"],
+            "state_int": df["state_int"],
+        }
+    )
+    # df_norm # Show dataframe
+    return X, df_norm, y
+
+
+@app.cell
+def _(df, px):
+    px.scatter(
+        df,
+        x="acceleration (m/s2)",
+        y="heart_rate (bpm)",
+        color="state",
+        title="Original data",
+        width=600,
+        height=450,
+    )
+    return
+
+
+@app.cell
+def _(df_norm, px):
+    # Compare original and normalized data
+    px.scatter(
+        df_norm,
+        x="acceleration_norm",
+        y="heart_rate_norm",
+        color="state",
+        color_continuous_scale="Bluered_r",
+        title="Normalized data",
+        width=600,
+        height=450,
+    )
+    return
 
 
 @app.cell
@@ -86,7 +133,11 @@ def _(b, mo, w1, w2):
     mo.vstack(
         [
             mo.md("# 'Manual' perceptron"),
-            mo.image("figures/simple_perceptron.svg", width=400),
+            # mo.image("figures/simple_perceptron.svg", width=400),
+            mo.image(
+                "https://raw.githubusercontent.com/mh-skjelvareid/inf-1600-intro-ai/main/figures/simple_perceptron.svg",
+                width=400,
+            ),
             mo.md("$y = g(x_1 w_1 + x_2 w_2 + b)$"),
             w1,
             w2,

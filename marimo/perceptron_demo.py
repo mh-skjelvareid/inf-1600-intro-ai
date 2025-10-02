@@ -10,8 +10,10 @@ def _():
     import numpy as np
     import plotly.graph_objects as go
     import polars as pl
-    import marimo as mo
     from plotly.subplots import make_subplots
+
+    import marimo as mo
+
     return go, make_subplots, mo, np, pl
 
 
@@ -25,7 +27,9 @@ def _(mo):
     initial_w2 = mo.ui.slider(
         start=-1, stop=1, step=0.1, value=-0.5, show_value=True, label="Initial w2"
     )
-    initial_b = mo.ui.slider(start=-1, stop=1, step=0.1, value=0, show_value=True, label="Initial b")
+    initial_b = mo.ui.slider(
+        start=-1, stop=1, step=0.1, value=0, show_value=True, label="Initial b"
+    )
 
     learning_rate = mo.ui.slider(
         steps=[0, 0.001, 0.0025, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5],
@@ -34,9 +38,11 @@ def _(mo):
         label="Learning rate",
     )
     n_epochs = mo.ui.slider(
-        steps=[1, 2, 3, 5, 10, 15, 20, 35, 50], value=1, show_value=True, label="Num. epochs"
+        steps=[1, 2, 3, 5, 10, 15, 20, 35, 50],
+        value=1,
+        show_value=True,
+        label="Num. epochs",
     )
-
 
     x1_range = (-4, 4)
     x2_range = (-4, 4)
@@ -56,7 +62,10 @@ def _(mo):
 @app.cell
 def _(pl):
     # Read data from CSV file
-    df = pl.read_csv("data/simple_acc_hr_dataset_v2.csv")
+    # df = pl.read_csv("data/simple_acc_hr_dataset_v2.csv")
+    df = pl.read_csv(
+        "https://raw.githubusercontent.com/mh-skjelvareid/inf-1600-intro-ai/main/data/simple_acc_hr_dataset_v2.csv"
+    )
 
     X_orig = df.select(pl.col(["acceleration (m/s2)", "heart_rate (bpm)"])).to_numpy()
     y = df.select(pl.col("state_int")).to_numpy().flatten()
@@ -75,31 +84,38 @@ def _(X_orig, np):
 @app.cell
 def _(X, initial_b, initial_w1, initial_w2, learning_rate, n_epochs, np, y):
     # Function to train perceptron - useful for namespace
-    def train_perceptron(X, y, learning_rate, n_epochs, w1_initial=0, w2_initial=0.5, b_initial=0):
+    def train_perceptron(
+        X, y, learning_rate, n_epochs, w1_initial=0, w2_initial=0.5, b_initial=0
+    ):
+        # Set initial values
         w1 = w1_initial
         w2 = w2_initial
         b = b_initial
 
+        # Lists for logging weights and accuracy
         weights_history = []
         accuracy_history = []
 
         for _ in range(n_epochs):
-            y_pred = []
-            for (x1, x2), correct_label in zip(X, y):
-                z = x1 * w1 + x2 * w2 + b
-                predicted_label = 1 if z >= 0 else 0
+            y_pred = []  # List for predicted outputs
 
+            for (x1, x2), correct_label in zip(X, y):
+                z = x1 * w1 + x2 * w2 + b  # Logit z
+                predicted_label = 1 if z >= 0 else 0  # "Step" activation function
+
+                # Update weights
                 update = learning_rate * (correct_label - predicted_label)
                 w1 += update * x1
                 w2 += update * x2
                 b += update
 
+                # Log history
                 weights_history.append([w1, w2, b])
                 y_pred.append(predicted_label)
-            accuracy_history += [np.mean(y_pred == y)] * len(y)
+
+            accuracy_history += [np.mean(y_pred == y)] * len(y)  # Epoch accuracy
 
         return (w1, w2, b), np.array(weights_history), np.array(accuracy_history)
-
 
     # Call function
     (w1, w2, b), weights_history, accuracy_history = train_perceptron(
@@ -143,17 +159,35 @@ def _(y, y_pred):
 
 
 @app.cell(hide_code=True)
+def _(mo):
+    mo.md(
+        r"""
+    # Perceptron
+    The controls below enables us to set initial values for the weights (w0,w1,w2). Note that normally the weights would be given a small random value, e.g. between -1 and 1. We can also define the learning rate (how fast weights are updated) and the number of epochs (how many times to repeat the learning process, over the whole dataset). The first plot below shows both how the values of the weights change for each time step, and how the accuracy of the perceptron changes with time (calculated for each epoch). The lowest plot shows the normalized data, and how the perceptron classifies the data after training. The background color corresponds to the "logits" z, i.e. the input to the activation function.
+    """
+    )
+    return
+
+
+@app.cell(hide_code=True)
 def _(initial_b, initial_w1, initial_w2, learning_rate, mo, n_epochs):
     mo.vstack(
         [
-            mo.md("# Perceptron"),
             mo.hstack(
                 [
-                    mo.image("figures/simple_perceptron.svg", width=400),
+                    # mo.image("figures/simple_perceptron.svg", width=400),
+                    mo.image(
+                        "https://raw.githubusercontent.com/mh-skjelvareid/inf-1600-intro-ai/main/figures/simple_perceptron.svg",
+                        width=400,
+                    ),
                     mo.vstack(
                         [
-                            mo.md(r"$w_{1,t+1} = w_{1,t} + LR \cdot (y-\hat{y}) \cdot x_1$"),
-                            mo.md(r"$w_{2,t+1} = w_{2,t} + LR \cdot (y-\hat{y}) \cdot x_2$"),
+                            mo.md(
+                                r"$w_{1,t+1} = w_{1,t} + LR \cdot (y-\hat{y}) \cdot x_1$"
+                            ),
+                            mo.md(
+                                r"$w_{2,t+1} = w_{2,t} + LR \cdot (y-\hat{y}) \cdot x_2$"
+                            ),
                             mo.md(r"$b_{1,t+1} = b_{1,t} + LR \cdot (y-\hat{y})$"),
                         ]
                     ),
@@ -166,35 +200,6 @@ def _(initial_b, initial_w1, initial_w2, learning_rate, mo, n_epochs):
             n_epochs,
         ]
     )
-    return
-
-
-@app.cell
-def _(accuracy_history, go, make_subplots, mo, weights_history):
-    def plot_weights_history(weights_history, accuracy_history):
-        # Create figure with secondary y-axis
-        fig = make_subplots(specs=[[{"secondary_y": True}]])
-        fig.add_trace(go.Scatter(y=weights_history[:, 0], mode="lines", name="w1"), secondary_y=False)
-        fig.add_trace(go.Scatter(y=weights_history[:, 1], mode="lines", name="w2"), secondary_y=False)
-        fig.add_trace(go.Scatter(y=weights_history[:, 2], mode="lines", name="b"), secondary_y=False)
-
-        fig.add_trace(
-            go.Scatter(y=accuracy_history, name="accuracy"),
-            secondary_y=True,
-        )
-        fig.update_layout(
-            title=f"Perceptron weights and accuracy during training",
-            xaxis_title="Time",
-            yaxis_title="Weight value",
-            height=400,
-            width=800,
-        )
-        fig.update_yaxes(title_text="Accuracy (per epoch)", secondary_y=True)
-        return fig
-
-
-    history_fig = plot_weights_history(weights_history, accuracy_history)
-    mo.ui.plotly(history_fig)
     return
 
 
@@ -304,8 +309,40 @@ def _(
     return
 
 
-@app.cell
-def _():
+@app.cell(hide_code=True)
+def _(accuracy_history, go, make_subplots, mo, weights_history):
+    def plot_weights_history(weights_history, accuracy_history):
+        # Create figure with secondary y-axis
+        fig = make_subplots(specs=[[{"secondary_y": True}]])
+        fig.add_trace(
+            go.Scatter(y=weights_history[:, 0], mode="lines", name="w1"),
+            secondary_y=False,
+        )
+        fig.add_trace(
+            go.Scatter(y=weights_history[:, 1], mode="lines", name="w2"),
+            secondary_y=False,
+        )
+        fig.add_trace(
+            go.Scatter(y=weights_history[:, 2], mode="lines", name="b"),
+            secondary_y=False,
+        )
+
+        fig.add_trace(
+            go.Scatter(y=accuracy_history, name="accuracy"),
+            secondary_y=True,
+        )
+        fig.update_layout(
+            title=f"Perceptron weights and accuracy during training",
+            xaxis_title="Time",
+            yaxis_title="Weight value",
+            height=400,
+            width=800,
+        )
+        fig.update_yaxes(title_text="Accuracy (per epoch)", secondary_y=True)
+        return fig
+
+    history_fig = plot_weights_history(weights_history, accuracy_history)
+    mo.ui.plotly(history_fig)
     return
 
 

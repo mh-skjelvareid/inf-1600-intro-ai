@@ -6,19 +6,24 @@ app = marimo.App(width="medium")
 
 @app.cell
 def _():
-    import marimo as mo
+    import math
+
     import numpy as np
     import plotly.graph_objects as go
-    from plotly.subplots import make_subplots
     import polars as pl
-    import math
+    from plotly.subplots import make_subplots
+
+    import marimo as mo
+
     return go, make_subplots, mo, np, pl
 
 
 @app.cell
 def _(pl):
     # Read noisy heart rate data
-    df = pl.read_csv("data/noisy_heart_rate_time_series.csv")
+    df = pl.read_csv(
+        "https://raw.githubusercontent.com/mh-skjelvareid/inf-1600-intro-ai/main/data/noisy_heart_rate_time_series.csv"
+    )
     time = df["t"].to_numpy()
     hr_accurate_orig = df["heart_rate_accurate"].to_numpy()
     hr_noisy_orig = df["heart_rate_noisy"].to_numpy()
@@ -45,7 +50,10 @@ def _(mo):
         label="Learning rate",
     )
     n_epochs = mo.ui.slider(
-        steps=[1, 3, 5, 10, 15, 20, 35, 50, 100], value=10, show_value=True, label="Num. epochs"
+        steps=[1, 3, 5, 10, 15, 20, 35, 50, 100],
+        value=10,
+        show_value=True,
+        label="Num. epochs",
     )
     return learning_rate, n_epochs
 
@@ -86,12 +94,15 @@ def _(hr_accurate, hr_noisy, learning_rate, n_epochs, np):
                 y_prev = y_pred
 
             # Calculate RMS error across epoch (per-sample is too noisy)
-            rms_error_history += [np.sqrt(np.mean((y_pred_vec - hr_accurate) ** 2))] * len(hr_noisy)
+            rms_error_history += [
+                np.sqrt(np.mean((y_pred_vec - hr_accurate) ** 2))
+            ] * len(hr_noisy)
 
         return (w1, w2, b), np.array(weights_history), np.array(rms_error_history)
 
-
-    (w1, w2, b), weights_history, rms_error_history = train_rnn(learning_rate.value, n_epochs.value)
+    (w1, w2, b), weights_history, rms_error_history = train_rnn(
+        learning_rate.value, n_epochs.value
+    )
     return b, rms_error_history, w1, w2, weights_history
 
 
@@ -100,7 +111,10 @@ def _(learning_rate, mo, n_epochs):
     mo.vstack(
         [
             mo.md("# Simple recurrent network for time series "),
-            mo.image("figures/simple_rnn.svg", width=400),
+            mo.image(
+                "https://raw.githubusercontent.com/mh-skjelvareid/inf-1600-intro-ai/main/figures/simple_rnn.svg",
+                width=400,
+            ),
             learning_rate,
             n_epochs,
         ]
@@ -120,9 +134,18 @@ def _(
     def plot_weights_history(weights_history, rms_error_history):
         # Create figure with secondary y-axis
         fig = make_subplots(specs=[[{"secondary_y": True}]])
-        fig.add_trace(go.Scatter(y=weights_history[:, 0], mode="lines", name="w1"), secondary_y=False)
-        fig.add_trace(go.Scatter(y=weights_history[:, 1], mode="lines", name="w2"), secondary_y=False)
-        fig.add_trace(go.Scatter(y=weights_history[:, 2], mode="lines", name="b"), secondary_y=False)
+        fig.add_trace(
+            go.Scatter(y=weights_history[:, 0], mode="lines", name="w1"),
+            secondary_y=False,
+        )
+        fig.add_trace(
+            go.Scatter(y=weights_history[:, 1], mode="lines", name="w2"),
+            secondary_y=False,
+        )
+        fig.add_trace(
+            go.Scatter(y=weights_history[:, 2], mode="lines", name="b"),
+            secondary_y=False,
+        )
 
         fig.add_trace(
             go.Scatter(y=rms_error_history * hr_accurate_std, name="RMS error"),
@@ -135,7 +158,6 @@ def _(
         )
         fig.update_yaxes(title_text="Mean heart rate error (BPM)", secondary_y=True)
         return fig
-
 
     history_fig = plot_weights_history(weights_history, rms_error_history)
     mo.ui.plotly(history_fig)
@@ -154,7 +176,6 @@ def _(b, hr_accurate, hr_noisy, np, w1, w2):
         rms_error = np.sqrt(np.mean((hr_pred - hr_accurate) ** 2))
 
         return hr_pred, rms_error
-
 
     hr_pred, rms_error = run_trained_rnn(w1, w2, b)
     return hr_pred, rms_error
