@@ -9,7 +9,7 @@ def _(mo):
     mo.md(
         r"""
     # Manual perceptron
-    This notebook is a demonstration of an "artificial neuron". An example dataset with acceleration and heart rate data (together with activity classification) is used, and the user can "tune" the neuron to the data to make it output the correct classification.  
+    This notebook is a demonstration of an "artificial neuron". An example dataset with acceleration and heart rate data (together with activity classification) is used, and the user can "tune" the neuron to the data to make it output the correct classification.
     """
     )
     return
