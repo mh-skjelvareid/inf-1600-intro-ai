@@ -10,6 +10,9 @@
    sodipodi:docname="simple_rnn.svg"
    xml:space="preserve"
    inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+   inkscape:export-filename="simple_rnn.png"
+   inkscape:export-xdpi="300"
+   inkscape:export-ydpi="300"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -26,11 +29,11 @@
      inkscape:document-units="mm"
      showgrid="true"
      inkscape:zoom="2.2198669"
-     inkscape:cx="200.23723"
-     inkscape:cy="121.40368"
-     inkscape:window-width="2131"
-     inkscape:window-height="1701"
-     inkscape:window-x="2126"
+     inkscape:cx="200.01199"
+     inkscape:cy="121.17844"
+     inkscape:window-width="1705"
+     inkscape:window-height="1360"
+     inkscape:window-x="-7"
      inkscape:window-y="0"
      inkscape:window-maximized="0"
      inkscape:current-layer="layer1"><inkscape:grid
@@ -266,7 +269,7 @@
        style="text-align:start;writing-mode:lr-tb;direction:ltr;white-space:pre;shape-inside:url(#rect8);display:inline;fill:none;stroke:#000000;stroke-width:1.00157;stroke-dasharray:none"><tspan
          x="200.31445"
          y="267.95578"
-         id="tspan1">+</tspan></text><g
+         id="tspan2">+</tspan></text><g
        data-mml-node="msub"
        data-latex="x_t"
        data-semantic-type="subscript"
