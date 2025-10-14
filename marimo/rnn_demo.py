@@ -4,7 +4,7 @@ __generated_with = "0.16.2"
 app = marimo.App(width="medium")
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md(
         r"""
@@ -14,7 +14,7 @@ def _(mo):
     - A "noisy" heart rate with systematic offset (from a low-cost smart watch)
     - An accurate heart rate from high-quatlity measurements (the desired output)
 
-    The recurrent network is used to predict / "mimic" the accurate heart rate based on the noisy heart rate signal. The network is trained using gradient descent, with learning rate and number of epochs as parameters that can be specified by the reader. 
+    The recurrent network is used to predict / "mimic" the accurate heart rate based on the noisy heart rate signal. The network is trained using gradient descent, with learning rate and number of epochs as parameters that can be specified by the reader.
     """
     )
     return
@@ -60,13 +60,13 @@ def _(mo):
     # Define input sliders
     learning_rate = mo.ui.slider(
         steps=[0, 0.0005, 0.001, 0.0025, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25],
-        value=0.01,
+        value=0.05,
         show_value=True,
         label="Learning rate",
     )
     n_epochs = mo.ui.slider(
         steps=[1, 3, 5, 10, 15, 20, 35, 50, 100],
-        value=10,
+        value=3,
         show_value=True,
         label="Num. epochs",
     )
@@ -236,11 +236,6 @@ def _(
     )
     # fig.show()
     mo.ui.plotly(fig)
-    return
-
-
-@app.cell
-def _():
     return
 
 

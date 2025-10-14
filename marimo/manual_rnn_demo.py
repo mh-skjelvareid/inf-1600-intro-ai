@@ -4,7 +4,7 @@ __generated_with = "0.16.2"
 app = marimo.App(width="medium")
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     mo.md(
         r"""
@@ -14,7 +14,7 @@ def _(mo):
     - A "noisy" heart rate with systematic offset (from a low-cost smart watch)
     - An accurate heart rate from high-quatlity measurements (the desired output)
 
-    The recurrent network is used to predict / "mimic" the accurate heart rate based on the noisy heart rate signal. The weights can be manually adjusted by the reader.  
+    The recurrent network is used to predict / "mimic" the accurate heart rate based on the noisy heart rate signal. The weights can be manually adjusted by the reader.
     """
     )
     return
