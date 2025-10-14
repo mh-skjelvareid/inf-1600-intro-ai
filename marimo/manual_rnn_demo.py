@@ -5,13 +5,28 @@ app = marimo.App(width="medium")
 
 
 @app.cell
+def _(mo):
+    mo.md(
+        r"""
+    # Manual recurrent network
+    This notebook demonstrates a very simple recurrent network, using synthetic heart rate data from two sources:
+
+    - A "noisy" heart rate with systematic offset (from a low-cost smart watch)
+    - An accurate heart rate from high-quatlity measurements (the desired output)
+
+    The recurrent network is used to predict / "mimic" the accurate heart rate based on the noisy heart rate signal. The weights can be manually adjusted by the reader.  
+    """
+    )
+    return
+
+
+@app.cell
 def _():
     import numpy as np
     import plotly.graph_objects as go
     import polars as pl
 
     import marimo as mo
-
     return go, mo, np, pl
 
 
@@ -38,15 +53,11 @@ def _(hr_accurate_orig, hr_noisy_orig, np):
     return hr_accurate, hr_accurate_mean, hr_accurate_std, hr_noisy
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     # Define input sliders
-    w1 = mo.ui.slider(
-        start=0, stop=1.1, step=0.05, value=0.2, label="w1", show_value=True
-    )
-    w2 = mo.ui.slider(
-        start=0, stop=1.1, step=0.05, value=0.2, label="w2", show_value=True
-    )
+    w1 = mo.ui.slider(start=0, stop=1.1, step=0.05, value=0.2, label="w1", show_value=True)
+    w2 = mo.ui.slider(start=0, stop=1.1, step=0.05, value=0.2, label="w2", show_value=True)
     b = mo.ui.slider(start=-1, stop=1, step=0.05, value=0, label="b", show_value=True)
     return b, w1, w2
 
@@ -125,11 +136,6 @@ def _(
     )
     # fig.show()
     mo.ui.plotly(fig)
-    return
-
-
-@app.cell
-def _():
     return
 
 

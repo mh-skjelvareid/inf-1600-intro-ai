@@ -5,6 +5,22 @@ app = marimo.App(width="medium")
 
 
 @app.cell
+def _(mo):
+    mo.md(
+        r"""
+    # Recurrent neural network demo
+    This notebook demonstrates a very simple recurrent network, using synthetic heart rate data from two sources:
+
+    - A "noisy" heart rate with systematic offset (from a low-cost smart watch)
+    - An accurate heart rate from high-quatlity measurements (the desired output)
+
+    The recurrent network is used to predict / "mimic" the accurate heart rate based on the noisy heart rate signal. The network is trained using gradient descent, with learning rate and number of epochs as parameters that can be specified by the reader. 
+    """
+    )
+    return
+
+
+@app.cell
 def _():
     import math
 
@@ -14,7 +30,6 @@ def _():
     from plotly.subplots import make_subplots
 
     import marimo as mo
-
     return go, make_subplots, mo, np, pl
 
 
@@ -40,7 +55,7 @@ def _(hr_accurate_orig, hr_noisy_orig, np):
     return hr_accurate, hr_accurate_mean, hr_accurate_std, hr_noisy
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(mo):
     # Define input sliders
     learning_rate = mo.ui.slider(
@@ -70,39 +85,34 @@ def _(hr_accurate, hr_noisy, learning_rate, n_epochs, np):
         weights_history = []
         rms_error_history = []
 
-        # Loop over time series for given number of epochs
+        # Loop over dataset n_epochs times
         for _ in range(n_epochs):
             y_prev = hr_noisy[0]  # Start state = input sample
             y_pred_vec = []
+
             # Loop over noisy and accurate samples (x and y)
             for x, y in zip(hr_noisy, hr_accurate):
                 # Predict output
                 y_pred = w1 * x + w2 * y_prev + b
-                y_pred_vec.append(y_pred)
-
-                # Calculate error
-                error = y_pred - y
 
                 # Update weights (gradient descent for squared error loss)
-                update = -learning_rate * 2 * error  # Neg sign to do gradient descent
+                update = -learning_rate * 2 * (y_pred - y)  # Neg sign to do gradient descent
                 w1 += update * x
                 w2 += update * y_prev
                 b += update
                 weights_history.append([w1, w2, b])
 
                 # Current output becomes previous output in next iteration
+                y_pred_vec.append(y_pred)
                 y_prev = y_pred
 
             # Calculate RMS error across epoch (per-sample is too noisy)
-            rms_error_history += [
-                np.sqrt(np.mean((y_pred_vec - hr_accurate) ** 2))
-            ] * len(hr_noisy)
+            rms_error_history += [np.sqrt(np.mean((y_pred_vec - hr_accurate) ** 2))] * len(hr_noisy)
 
         return (w1, w2, b), np.array(weights_history), np.array(rms_error_history)
 
-    (w1, w2, b), weights_history, rms_error_history = train_rnn(
-        learning_rate.value, n_epochs.value
-    )
+
+    (w1, w2, b), weights_history, rms_error_history = train_rnn(learning_rate.value, n_epochs.value)
     return b, rms_error_history, w1, w2, weights_history
 
 
@@ -159,6 +169,7 @@ def _(
         fig.update_yaxes(title_text="Mean heart rate error (BPM)", secondary_y=True)
         return fig
 
+
     history_fig = plot_weights_history(weights_history, rms_error_history)
     mo.ui.plotly(history_fig)
     return
@@ -176,6 +187,7 @@ def _(b, hr_accurate, hr_noisy, np, w1, w2):
         rms_error = np.sqrt(np.mean((hr_pred - hr_accurate) ** 2))
 
         return hr_pred, rms_error
+
 
     hr_pred, rms_error = run_trained_rnn(w1, w2, b)
     return hr_pred, rms_error
